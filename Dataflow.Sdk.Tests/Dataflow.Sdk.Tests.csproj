@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <IsPackable>false</IsPackable>
+    <!-- Microsoft.Testing.Platform: the test binary is a normal executable
+         (`dotnet run`) with the project's own runtimeconfig — no vstest
+         testhost, so the SDK's AspNetCore FrameworkReference is irrelevant. -->
+    <OutputType>Exe</OutputType>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <!-- Keep generated sources out of a "Dataflow.*" namespace: a global
+         namespace Dataflow would shadow the SDK's static Dataflow class. -->
+    <RootNamespace>DataflowSdk.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Platform" Version="2.4.1" />
+    <PackageReference Include="xunit.v3" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dataflow.Sdk\Dataflow.Sdk.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- The SDK's AspNetCore FrameworkReference flows transitively into the
+         test app's runtimeconfig; where the ASP.NET Core 8.x shared runtime
+         is absent (e.g. only 6.x/10.x installed), roll forward to 10.x. -->
+    <RollForward>LatestMajor</RollForward>
+  </PropertyGroup>
+
+</Project>

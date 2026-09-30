@@ -1,0 +1,6 @@
+bin/
+obj/
+
+# The wire contract is vendored next to the project at build time
+# (Dockerfile) and must never be committed.
+Dataflow.Sdk/protos/

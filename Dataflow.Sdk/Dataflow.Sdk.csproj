@@ -24,4 +24,9 @@
     <Protobuf Include="protos\dataflow.proto" GrpcServices="Client" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The test assembly asserts on span internals (replay buffer, SQL summary). -->
+    <InternalsVisibleTo Include="Dataflow.Sdk.Tests" />
+  </ItemGroup>
+
 </Project>

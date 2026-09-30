@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Threading;
 
 namespace Dev.HuginnLabs.Dataflow;
@@ -12,7 +13,7 @@ namespace Dev.HuginnLabs.Dataflow;
 public static class Dataflow
 {
     /// <summary>SDK version stamped into agent metadata and the manifest.</summary>
-    public const string SdkVersion = "0.2.0";
+    public const string SdkVersion = "0.3.0";
 
     /// <summary>Immutable SDK configuration.</summary>
     public sealed record Settings
@@ -94,4 +95,17 @@ public static class Dataflow
 
     /// <summary>Runs <paramref name="body"/> inside a named span scope.</summary>
     public static TraceScope Trace(string name, string type = "FUNCTION_CALL") => new(name, type);
+
+    /// <summary>
+    /// Wraps an ADO.NET connection so every command execution emits a
+    /// DB_QUERY span (verb + table as the name, the dialect in
+    /// <c>db.system</c>, the statement text in <c>db.statement</c> —
+    /// parameter values are never captured). <paramref name="system"/> is
+    /// the database system or driver name ("npgsql", "mysql", "sqlite",
+    /// "sqlserver"); known driver names normalize to the system
+    /// ("npgsql" → "postgres").
+    /// <code>await using var conn = Dataflow.Wrap(new NpgsqlConnection(cs), "npgsql");</code>
+    /// </summary>
+    public static DbConnection Wrap(DbConnection connection, string system) =>
+        new DataflowConnection(connection, system);
 }

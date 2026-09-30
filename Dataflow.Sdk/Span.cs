@@ -168,6 +168,7 @@ public sealed class Span
         "HTTP_SERVER" => global::HuginnLabs.Proto.EventType.HttpServer,
         "HTTP_CLIENT" => global::HuginnLabs.Proto.EventType.HttpClient,
         "GRPC" => global::HuginnLabs.Proto.EventType.Grpc,
+        "DB_QUERY" => global::HuginnLabs.Proto.EventType.DbQuery,
         _ => global::HuginnLabs.Proto.EventType.FunctionCall,
     };
 

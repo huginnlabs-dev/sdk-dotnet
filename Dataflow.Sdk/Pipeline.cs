@@ -21,8 +21,9 @@ namespace Dev.HuginnLabs.Dataflow;
 /// </summary>
 internal static class Pipeline
 {
-    private static readonly List<TraceEvent> Buffer = new();
-    private static readonly object BufLock = new();
+    // Tests in Dataflow.Sdk.Tests assert on buffered spans directly.
+    internal static readonly List<TraceEvent> Buffer = new();
+    internal static readonly object BufLock = new();
     private static long _base = 1; // seq of the oldest buffered event
     private static long _seq;
     private static GrpcChannel? _channel;
