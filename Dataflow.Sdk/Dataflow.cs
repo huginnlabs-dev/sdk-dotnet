@@ -11,8 +11,8 @@ namespace Dev.HuginnLabs.Dataflow;
 /// </summary>
 public static class Dataflow
 {
-    /// <summary>SDK version stamped into agent metadata.</summary>
-    public const string SdkVersion = "0.1.0";
+    /// <summary>SDK version stamped into agent metadata and the manifest.</summary>
+    public const string SdkVersion = "0.2.0";
 
     /// <summary>Immutable SDK configuration.</summary>
     public sealed record Settings

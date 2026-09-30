@@ -44,6 +44,9 @@ internal static class Pipeline
 
     internal static void Start()
     {
+        // Report the service manifest once (framework + dependency
+        // inventory); best-effort, independent of the tracing pipeline.
+        Manifest.Send(Dataflow.Cfg.Endpoint, Dataflow.Cfg.ApiKey, Dataflow.ServiceName());
         // Plaintext http:// endpoints need the h2c switch; production
         // endpoints use https and ignore this.
         AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
