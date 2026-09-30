@@ -11,7 +11,10 @@ namespace DataflowSdk.Tests;
 
 // Transport tracing end to end over fakes: a stub HttpMessageHandler and
 // stub ADO.NET classes (DbConnection/DbCommand are abstract — directly
-// implementable). One test class so enable/disable flips stay sequential.
+// implementable). One test class so enable/disable flips stay sequential;
+// it shares the "Dataflow Globals" collection with CrashTests, the only
+// other suite mutating the global settings/replay buffer.
+[Collection("Dataflow Globals")]
 public class TransportTracingTests
 {
     // Nothing listens on port 9; the sender retries harmlessly in the

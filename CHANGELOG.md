@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5.0 — 2026-09-30
+
+### Added
+
+- Crash capture: `Dataflow.Capture(action)` and `Dataflow.Capture<T>(func)`
+  bracket a block of code and, on an uncaught exception, record on the
+  ambient span (a synthetic `exception` span when none is open) before
+  rethrowing with the original stack preserved — status 500, the exception
+  summary (first line of `ToString()`, capped at 500 chars) as
+  `error_message`, and the raw stack trace clipped at 8192 characters from
+  the top in the `error.stack` attribute.
+- `Dataflow.CaptureUncaught()` / `Dataflow.IgnoreUncaught()`: subscribe /
+  unsubscribe `AppDomain.UnhandledException` and
+  `TaskScheduler.UnobservedTaskException` (idempotent; never
+  `SetObserved()`). Both record synthetic `uncaught exception` spans
+  synchronously — the unhandled handler runs during process death and
+  cannot rethrow.
+- Best-effort by construction: when the SDK is disabled every entry point
+  is a pure pass-through, and recording failures are swallowed so they
+  never mask the original exception.
+
 ## 0.4.0 — 2026-09-30
 
 ### Added

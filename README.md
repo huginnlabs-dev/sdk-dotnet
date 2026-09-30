@@ -74,6 +74,38 @@ Driver/dialect names normalize to systems: `npgsql` → `postgres`;
 pass through. All other connection and command members pass through
 unchanged; when tracing is disabled the wrapper adds nothing.
 
+## Crash capture
+
+`Dataflow.Capture` brackets a block of code and records uncaught
+exceptions before rethrowing with the original stack preserved: the span
+gets status 500, the exception summary (first line of `ToString()` — type
+plus message, capped at 500 characters) as `error_message`, and the raw
+stack trace clipped at 8192 characters from the top in the `error.stack`
+attribute. Recording lands on the ambient span when one is open, or a
+synthetic `exception` span when none is.
+
+```csharp
+Dataflow.Capture(() => Charge(order));            // void
+var total = Dataflow.Capture(() => ComputeTotal()); // value-returning
+```
+
+`Dataflow.CaptureUncaught()` also watches what escapes your code:
+`AppDomain.UnhandledException` and `TaskScheduler.UnobservedTaskException`
+are recorded as synthetic `uncaught exception` spans (parented to the
+ambient trace when one is open). The subscription is idempotent and
+`Dataflow.IgnoreUncaught()` removes it; unobserved exceptions are never
+marked observed, so recording never changes the app's fate. The unhandled
+handler runs synchronously during process death — recording stays fast
+and cannot rethrow.
+
+```csharp
+Dataflow.CaptureUncaught(); // install once at startup
+```
+
+Everything here is best-effort: with the SDK disabled it is a pure
+pass-through, and recording failures are swallowed so they never mask the
+original exception.
+
 ## Route scanning
 
 `Dataflow.Scan` is a static route scanner: it walks a source tree,

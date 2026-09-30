@@ -10,10 +10,10 @@ namespace Dev.HuginnLabs.Dataflow;
 /// values are AES-256-GCM encrypted with a PBKDF2-derived key that never
 /// leaves the process.
 /// </summary>
-public static class Dataflow
+public static partial class Dataflow
 {
     /// <summary>SDK version stamped into agent metadata and the manifest.</summary>
-    public const string SdkVersion = "0.4.0";
+    public const string SdkVersion = "0.5.0";
 
     /// <summary>Immutable SDK configuration.</summary>
     public sealed record Settings
