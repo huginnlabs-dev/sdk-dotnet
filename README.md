@@ -74,6 +74,51 @@ Driver/dialect names normalize to systems: `npgsql` → `postgres`;
 pass through. All other connection and command members pass through
 unchanged; when tracing is disabled the wrapper adds nothing.
 
+## Route scanning
+
+`Dataflow.Scan` is a static route scanner: it walks a source tree,
+extracts the HTTP endpoints your code declares (line-oriented regexes —
+no Roslyn, no build), and posts them to the Dataflow server catalog
+(`POST /api/v1/catalog`, `X-Api-Key` header, capped at 1000 routes).
+
+```sh
+dotnet run --project Dataflow.Scan -- --dir ./src --service orders-api --url https://dataflow.example --api-key $DATAFLOW_API_KEY
+```
+
+Extraction coverage:
+
+- ASP.NET Core attribute routing — a `[Route("api/[controller]")]` on the
+  controller class becomes the prefix, combined with `[HttpGet]` /
+  `[HttpPost]` / `[HttpPut]` / `[HttpDelete]` / `[HttpPatch]` /
+  `[AcceptVerbs]` on actions. The enclosing class is tracked with a
+  brace-depth scan; the handler is `ControllerClass.Action`.
+- Tokens resolve the way ASP.NET does: `[controller]` → controller name
+  lowercased without the `Controller` suffix (`OrdersController` →
+  `orders`), `[action]` → action name lowercased. Bare `[HttpGet]` with no
+  path contributes only the prefix (empty when there is none); an absolute
+  action template (`[HttpGet("/healthz")]`) overrides the prefix; route
+  parameters keep the `{id}` / `{id:int}` syntax. Actions with only
+  `[Route]` and no method verb are skipped (the verb is unknowable).
+- Minimal APIs — `app.MapGet("/path", ...)` and the `MapPost` / `MapPut` /
+  `MapDelete` / `MapPatch` siblings; the handler field is empty (lambdas
+  have no name, `source_file` carries the reference).
+- Razor Pages (`PageModel` + `OnGet`/`OnPost`) match nothing by design.
+
+Skipped: `bin/`, `obj/`, `.git/`, `*Tests.cs`. Routes deduplicate per file
+and post as `{"service_name":"...","routes":[{"method":"GET","path":"/api/orders/{id}","handler":"OrdersController.Get","source_file":"Controllers/OrdersController.cs"}]}`.
+
+Flags: `--dir` (default `.`), `--service` (default: the directory name),
+`--url`, `--api-key`, `--print` (print the catalog JSON to stdout instead
+of posting). The base URL resolves exactly like the startup manifest:
+`--url` → `DATAFLOW_HTTP_URL` → URL-form `DATAFLOW_ENDPOINT` (a bare
+`host:port` gRPC endpoint has no derivable HTTP base and is reported).
+The API key comes from `--api-key` or `DATAFLOW_API_KEY`. Exit codes:
+`0` ok, `2` usage/config error, `3` post failure.
+
+```sh
+dotnet run --project Dataflow.Scan -- --dir ./src --print   # inspect, don't post
+```
+
 ## Build
 
 ```sh

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.0 — 2026-09-30
+
+### Added
+
+- Static route scanner (`Dataflow.Sdk.Scan.ScanTool` + the `Dataflow.Scan`
+  console project): extracts declared HTTP endpoints from C# sources and
+  posts them to the server catalog via best-effort `POST /api/v1/catalog`.
+  Regex-based (no Roslyn): ASP.NET Core attribute routing (class
+  `[Route]` prefix combined with `[HttpGet]`/`[HttpPost]`/`[HttpPut]`/
+  `[HttpDelete]`/`[HttpPatch]`/`[AcceptVerbs]` actions, enclosing class
+  tracked by brace depth, `[controller]`/`[action]` tokens resolved like
+  ASP.NET) and minimal APIs (`app.MapGet(...)` and siblings, empty
+  handler); Razor Pages match nothing by design.
+- Scan CLI flags: `--dir`, `--service` (defaults to the directory name),
+  `--url`, `--api-key`, `--print` (print the catalog JSON instead of
+  posting). Base URL precedence matches the startup manifest: `--url` →
+  `DATAFLOW_HTTP_URL` → URL-form `DATAFLOW_ENDPOINT` (a bare host:port is
+  reported and skipped).
+
 ## 0.3.0 — 2026-09-30
 
 ### Added

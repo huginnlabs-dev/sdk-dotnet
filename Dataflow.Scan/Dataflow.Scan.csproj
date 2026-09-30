@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <Version>0.4.0</Version>
+    <Description>HuginnLabs Dataflow route scanner — extracts declared HTTP endpoints from C# sources and posts them to the service catalog.</Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- The SDK's AspNetCore FrameworkReference flows transitively into this
+         app's runtimeconfig; where the ASP.NET Core 8.x shared runtime is
+         absent (e.g. only 6.x/10.x installed), roll forward to 10.x. -->
+    <RollForward>LatestMajor</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dataflow.Sdk\Dataflow.Sdk.csproj" />
+  </ItemGroup>
+
+</Project>
