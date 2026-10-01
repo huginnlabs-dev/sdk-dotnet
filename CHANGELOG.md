@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.6.0 — 2026-09-30
+
+### Added
+
+- Application log shipping with trace correlation: `Dataflow.Info` /
+  `Warn` / `Error` / `Debug` and `Dataflow.Log(level, ...)` buffer lines
+  in a bounded queue (1024, drop-oldest with a dropped counter) and a
+  daemon flusher POSTs them to `POST /api/v1/logs` in batches of ≤1000
+  (500ms ticker / 50-line wake, 5s timeout, one retry per batch then
+  drop). Every line carries a unix-ms timestamp, the wire level
+  (`debug|info|warn|error`, unknown levels degrade to info), the
+  stringified fields (clamped to the server's 50×512; messages to 8192
+  chars), the service name and the ambient span's trace/span ids — empty
+  when no span is open on the calling flow.
+- `Dataflow.FlushLogs()` synchronously ships buffered lines for shutdown
+  paths.
+- `DataflowLoggerProvider` / `DataflowLogger`: a Microsoft.Extensions
+  Logging `ILoggerProvider` that forwards records into the pipeline with
+  level mapping and structured-log state as fields (scopes skipped in
+  v1) — zero new package references, the abstractions ship in the
+  ASP.NET Core shared framework. Register via
+  `logging.AddProvider(new DataflowLoggerProvider())`.
+- `Dataflow.InstallLogHandler()` / `Dataflow.UninstallLogHandler()`: an
+  idempotent `System.Diagnostics.Trace` listener bridge (Trace severities
+  map onto the wire vocabulary) for apps that do not route through
+  Microsoft.Extensions.Logging.
+- Logging is best-effort and strictly off when there is no HTTP base: a
+  bare `host:port` `DATAFLOW_ENDPOINT` with no `DATAFLOW_HTTP_URL`
+  override ships nothing (records are not even buffered) while tracing
+  keeps working. With the SDK disabled every entry point is a no-op.
+- Test suite: record/wire shape, batching, overflow, retry-then-drop,
+  level mapping, clamps, both bridges and disabled no-ops against a raw
+  `TcpListener` HTTP stub on the IPv6 loopback.
+
 ## 0.5.0 — 2026-09-30
 
 ### Added

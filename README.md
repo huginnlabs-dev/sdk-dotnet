@@ -106,6 +106,63 @@ Everything here is best-effort: with the SDK disabled it is a pure
 pass-through, and recording failures are swallowed so they never mask the
 original exception.
 
+## Log capture
+
+Application log shipping with trace correlation: `Dataflow.Info` /
+`Warn` / `Error` / `Debug` (and `Dataflow.Log(level, ...)` for dynamic
+levels — case-insensitive `debug` / `info` / `warn` / `error`, unknown
+levels degrade to info) buffer log lines in-process and POST them in
+batches to `POST /api/v1/logs`. Every line is stamped with the ambient
+span's trace/span ids (empty when no span is open on the calling flow),
+so logs line up with traces in the dashboard's Logs tab.
+
+```csharp
+Dataflow.Info("order placed", new Dictionary<string, object>
+{
+    ["order_id"] = orderId,   // values are stringified
+    ["channel"] = "web",
+});
+```
+
+Delivery is batched and best-effort: a daemon flusher POSTs every 500ms
+(or as soon as 50 lines are buffered), at most 1000 lines per request,
+one retry per batch and then it is dropped and counted. The in-memory
+queue holds 1024 lines — on overflow the oldest line is dropped and
+counted, and logging never blocks or throws. Fields are stringified and
+clipped to the server's limits (50 fields × 512 chars; messages to 8192
+chars). `Dataflow.FlushLogs()` ships whatever is buffered synchronously —
+call it on shutdown paths.
+
+The base URL resolves exactly like the startup manifest: a URL-form
+`DATAFLOW_ENDPOINT` is used directly, a bare `host:port` gRPC endpoint
+with no `DATAFLOW_HTTP_URL` override has no derivable HTTP base and
+logging stays silently off (tracing is unaffected).
+
+### Logging bridges
+
+`DataflowLoggerProvider` forwards Microsoft.Extensions.Logging records
+into the pipeline (levels map Trace/Debug→debug, Information→info,
+Warning→warn, Error/Critical→error; structured-log state entries become
+stringified fields; scopes are skipped in v1). It needs no new package —
+the logging abstractions ship in the ASP.NET Core shared framework:
+
+```csharp
+builder.Logging.AddProvider(new DataflowLoggerProvider());
+```
+
+For apps that do not route through `Microsoft.Extensions.Logging`,
+`Dataflow.InstallLogHandler()` bridges `System.Diagnostics.Trace` instead:
+`Trace.TraceError` / `TraceWarning` / `TraceInformation` and plain
+`Trace.Write` ship as error / warn / info / info lines. The install is
+idempotent; `Dataflow.UninstallLogHandler()` removes it.
+
+```csharp
+Dataflow.InstallLogHandler(); // once at startup, before any Trace.* calls
+```
+
+With the SDK disabled every entry point is a no-op: nothing is buffered,
+nothing ships.
+
 ## Route scanning
 
 `Dataflow.Scan` is a static route scanner: it walks a source tree,

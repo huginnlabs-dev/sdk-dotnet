@@ -45,8 +45,11 @@ internal static class Pipeline
 
     internal static void Start()
     {
-        // Report the service manifest once (framework + dependency
-        // inventory); best-effort, independent of the tracing pipeline.
+        // Start the log shipper daemon first (independent of the tracing
+        // pipeline; a no-op ticker when logging is off), then report the
+        // service manifest once (framework + dependency inventory) —
+        // best-effort.
+        Logs.EnsureStarted();
         Manifest.Send(Dataflow.Cfg.Endpoint, Dataflow.Cfg.ApiKey, Dataflow.ServiceName());
         // Plaintext http:// endpoints need the h2c switch; production
         // endpoints use https and ignore this.
