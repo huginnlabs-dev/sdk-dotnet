@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.7.0 — 2026-10-01
+
+### Added
+
+- Serilog sink, isolated in a new `Dataflow.Serilog` project so the core
+  SDK carries no Serilog dependency: `DataflowSink` implements
+  `Serilog.Core.ILogEventSink` and enqueues straight into the log pipeline
+  (`Logs.Ship`, no level re-normalization) — Verbose/Debug→debug,
+  Information→info, Warning→warn, Error/Fatal→error; `RenderMessage()` as
+  the message (string scalars render quoted, per Serilog); event
+  properties as stringified fields (first 50 keys, values clipped at 512
+  chars, the server's limits); an attached exception carried on the
+  message and clipped at 8192 chars with it. Events ride the standard
+  batched shipping (1024-line drop-oldest buffer, ≤1000-line POSTs, one
+  retry) with ambient trace/span correlation, and `Emit` is a no-op that
+  never throws while the SDK is disabled or no HTTP base resolves.
+- Registration conveniences: `DataflowSerilog.SerilogSink()` for
+  `WriteTo.Sink(...)` (the SDK's static `Dataflow` class cannot receive
+  extension members from another assembly) and the idiomatic
+  `WriteTo.Dataflow()` on `LoggerSinkConfiguration`.
+- Test suite (`Dataflow.Serilog.Tests`, xunit.v3 on Microsoft.Testing
+  Platform): per-level mapping, message-template rendering, scalar
+  stringification (string/bool/double/long/null), 50×512 property clamps,
+  8192 message clip, exception-on-message, wire shape + `X-Api-Key` +
+  trace ids against a raw IPv6-loopback `TcpListener` HTTP stub,
+  1000-line batch split, and disabled / bare-host:port no-ops.
+
 ## 0.6.0 — 2026-09-30
 
 ### Added

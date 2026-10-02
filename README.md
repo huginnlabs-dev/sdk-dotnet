@@ -160,6 +160,22 @@ idempotent; `Dataflow.UninstallLogHandler()` removes it.
 Dataflow.InstallLogHandler(); // once at startup, before any Trace.* calls
 ```
 
+### Serilog sink
+
+Serilog gets its own package, `Dataflow.Serilog` (the core SDK carries no
+Serilog dependency): `DataflowSink` is a `Serilog.Core.ILogEventSink` that
+forwards events straight into the pipeline — Verbose/Debug→debug,
+Information→info, Warning→warn, Error/Fatal→error, `RenderMessage()` as
+the message (string scalars render quoted, per Serilog), event properties
+as stringified fields, an attached exception carried on the message. It
+batches through the SDK's pipeline, so no separate batching sink package
+is involved, and events keep their ambient trace/span correlation:
+
+```csharp
+Log.Logger = new LoggerConfiguration().WriteTo.Dataflow().CreateLogger();
+// or: new LoggerConfiguration().WriteTo.Sink(DataflowSerilog.SerilogSink())
+```
+
 With the SDK disabled every entry point is a no-op: nothing is buffered,
 nothing ships.
 
@@ -213,6 +229,7 @@ dotnet run --project Dataflow.Scan -- --dir ./src --print   # inspect, don't pos
 ```sh
 dotnet build Dataflow.Sdk
 dotnet test --project Dataflow.Sdk.Tests
+dotnet test --project Dataflow.Serilog.Tests
 ```
 
 `protos/dataflow.proto` is the wire contract, copied next to the project

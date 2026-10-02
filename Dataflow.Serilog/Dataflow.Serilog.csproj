@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <Version>0.7.0</Version>
+    <Description>Serilog sink for the HuginnLabs Dataflow SDK — ships log events through the Dataflow log pipeline.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dataflow.Sdk\Dataflow.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The test assembly asserts on the level-mapping seam directly. -->
+    <InternalsVisibleTo Include="Dataflow.Serilog.Tests" />
+  </ItemGroup>
+
+</Project>

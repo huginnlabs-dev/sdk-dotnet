@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
-    <Version>0.6.0</Version>
+    <Version>0.7.0</Version>
     <Description>HuginnLabs Dataflow SDK for .NET — runtime tracing over gRPC with E2E-encrypted payloads.</Description>
   </PropertyGroup>
 
@@ -28,6 +28,10 @@
   <ItemGroup>
     <!-- The test assembly asserts on span internals (replay buffer, SQL summary). -->
     <InternalsVisibleTo Include="Dataflow.Sdk.Tests" />
+    <!-- The Serilog sink enqueues directly into the log pipeline (Logs.Ship)
+         and its test assembly asserts on the buffered-queue seams. -->
+    <InternalsVisibleTo Include="Dataflow.Serilog" />
+    <InternalsVisibleTo Include="Dataflow.Serilog.Tests" />
   </ItemGroup>
 
 </Project>
