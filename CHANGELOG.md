@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.8.0 — 2026-10-02
+
+### Added
+
+- NLog target, isolated in a new `Dataflow.NLog` project so the core SDK
+  carries no NLog dependency: `DataflowTarget` extends
+  `NLog.Targets.TargetWithLayout` (registered as target type `Dataflow`)
+  and enqueues straight into the log pipeline (`Logs.Ship`, no level
+  re-normalization) — Trace/Debug→debug, Info→info, Warn→warn,
+  Error/Fatal→error; the target's layout — defaulted to `${message}`,
+  since the wire record carries its own timestamp and level — is the
+  message; message-template properties as stringified fields (first 50
+  keys, values clipped at 512 chars, the server's limits); an attached
+  exception carried on the message and clipped at 8192 chars with it.
+  Events ride the standard batched shipping (1024-line drop-oldest
+  buffer, ≤1000-line POSTs, one retry) with ambient trace/span
+  correlation, and `Write` is a no-op that never throws into the NLog
+  pipeline while the SDK is disabled or no HTTP base resolves.
+- Registration conveniences: `DataflowNLog.Setup()` registers the target
+  (name `Dataflow`, all-levels rule) on the default `LogManager`
+  factory, and `DataflowNLog.Setup(LogFactory)` on an explicit factory —
+  both create the configuration when the factory has none loaded and
+  return the target.
+- Test suite (`Dataflow.NLog.Tests`, xunit.v3 on Microsoft.Testing
+  Platform): per-level mapping, message-template rendering, scalar
+  stringification (string/bool/double/long/null), 50×512 property
+  clamps, 8192 message clip, exception-on-message, wire shape +
+  `X-Api-Key` + trace ids against a raw IPv6-loopback `TcpListener`
+  HTTP stub, 1000-line batch split, both `Setup` overloads, and
+  disabled / bare-host:port no-ops.
+
 ## 0.7.0 — 2026-10-01
 
 ### Added

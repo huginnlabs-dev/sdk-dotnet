@@ -179,6 +179,30 @@ Log.Logger = new LoggerConfiguration().WriteTo.Dataflow().CreateLogger();
 With the SDK disabled every entry point is a no-op: nothing is buffered,
 nothing ships.
 
+### NLog target
+
+NLog gets its own package too, `Dataflow.NLog` (the core SDK carries no
+NLog dependency): `DataflowTarget` is an `NLog.Targets.TargetWithLayout`
+that forwards events straight into the pipeline — Trace/Debug→debug,
+Info→info, Warn→warn, Error/Fatal→error, the target's layout (defaulted
+to `${message}`, since the wire record carries its own timestamp and
+level) as the message, message-template properties as stringified
+fields, an attached exception carried on the message. It batches through
+the SDK's pipeline, and events keep their ambient trace/span correlation:
+
+```csharp
+DataflowNLog.Setup(); // registers the "Dataflow" target, all levels
+// or, for an explicit LogFactory:
+DataflowNLog.Setup(myLogFactory);
+```
+
+Both calls create the target configuration if the factory has none
+loaded, register the target under the name `Dataflow` with an
+all-levels rule, and return it — call once at startup, before any
+logging happens. With the SDK disabled (or a bare `host:port` endpoint
+with no `DATAFLOW_HTTP_URL` override) the target is a no-op: nothing is
+buffered, nothing ships.
+
 ## Route scanning
 
 `Dataflow.Scan` is a static route scanner: it walks a source tree,
@@ -230,6 +254,7 @@ dotnet run --project Dataflow.Scan -- --dir ./src --print   # inspect, don't pos
 dotnet build Dataflow.Sdk
 dotnet test --project Dataflow.Sdk.Tests
 dotnet test --project Dataflow.Serilog.Tests
+dotnet test --project Dataflow.NLog.Tests
 ```
 
 `protos/dataflow.proto` is the wire contract, copied next to the project

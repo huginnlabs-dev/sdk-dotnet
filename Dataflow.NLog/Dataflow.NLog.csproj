@@ -6,11 +6,11 @@
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <Version>0.8.0</Version>
-    <Description>Serilog sink for the HuginnLabs Dataflow SDK — ships log events through the Dataflow log pipeline.</Description>
+    <Description>NLog target for the HuginnLabs Dataflow SDK — ships log events through the Dataflow log pipeline.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="NLog" Version="5.5.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <!-- The test assembly asserts on the level-mapping seam directly. -->
-    <InternalsVisibleTo Include="Dataflow.Serilog.Tests" />
+    <InternalsVisibleTo Include="Dataflow.NLog.Tests" />
   </ItemGroup>
 
 </Project>
