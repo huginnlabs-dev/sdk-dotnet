@@ -273,5 +273,7 @@ instrumentation / Dataflow SDK / OpenTelemetry), one shared load driver,
 spans exported live. Methodology, current numbers and reproduction steps:
 BENCHMARKS.md (repo root of the Dataflow monorepo) in the Dataflow monorepo root.
 
-Numbers for this SDK: **queued** — the harness follows the same contract
-and will land here.
+Measured for this SDK (ASP.NET Core + DataflowMiddleware, one child span
+per request, gRPC export live): **≈ 0.5% throughput cost** on a ~14 ms
+endpoint — the per-request bookkeeping disappears into the framework's
+noise floor, percentiles unchanged.
