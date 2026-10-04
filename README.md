@@ -271,7 +271,7 @@ The runtime overhead of every Dataflow SDK is measured with a uniform
 benchmark: the same ~1 ms CPU-bound HTTP endpoint in three configs (no
 instrumentation / Dataflow SDK / OpenTelemetry), one shared load driver,
 spans exported live. Methodology, current numbers and reproduction steps:
-BENCHMARKS.md (repo root of the Dataflow monorepo) in the Dataflow monorepo root.
+The full harness is in the Dataflow monorepo `bench/`.
 
 Measured for this SDK (ASP.NET Core + DataflowMiddleware, one child span
 per request, gRPC export live): **≈ 0.5% throughput cost** on a ~14 ms
