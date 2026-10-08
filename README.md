@@ -1,4 +1,11 @@
+<div align="center">
+
+  <img src="assets/mark.svg" width="72" alt="Dataflow mark" />
+
 # HuginnLabs Dataflow SDK for .NET
+
+</div>
+
 
 Runtime tracing for .NET services: spans stream to the Dataflow ingestion
 API over gRPC (`StreamEvents`) with an ack-watermark replay buffer, and
